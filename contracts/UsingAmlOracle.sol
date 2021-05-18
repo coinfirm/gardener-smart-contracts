@@ -3,33 +3,23 @@ pragma solidity ^0.5.0;
 import "./OracleI.sol";
 import "./UsingOracleI.sol";
 
-
-contract UsingOracle is UsingOracleI {
-
+contract UsingAmlOracle is UsingOracleI {
     OracleI public oracle;
-
-    mapping(bytes32 => bool) pendingRequests;
 
     constructor(OracleI _oracle) public {
         oracle = _oracle;
     }
 
-    function request(string memory _url) public {
-        bytes32 id = oracle.request(_url);
-        pendingRequests[id] = true;
+    function request(string calldata _cryptoId, string calldata _address) external {
+        string memory query = string(abi.encodePacked("aml(", _cryptoId, ",", _address, ").cscore_section"));
+        bytes32 id = oracle.request(query);
 
-        emit DataRequestedFromOracle(id, _url);
-    }
-
-    function delayedRequest(string memory _url, uint _delay) public {
-        bytes32 id = oracle.delayedRequest(_url, _delay);
-        pendingRequests[id] = true;
-
-        emit DataRequestedFromOracle(id, _url);
+        emit DataRequestedFromOracle(id, query);
     }
 
     function __callback(bytes32 _id, string calldata _value, uint _errorCode) external onlyFromOracle {
         emit DataReadFromOracle(_id, _value, _errorCode);
+        // or do something else with data returned from the oracle
     }
 
     modifier onlyFromOracle() {
