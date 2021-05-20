@@ -2,6 +2,7 @@
 /node_modules
 /coverage/
 /coverageEnv/
+.idea
 /coverage.json
 /oracle-sm.iml
 /scTopics
